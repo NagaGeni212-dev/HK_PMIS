@@ -9,7 +9,7 @@
     style.textContent = `
   .ovw-card {
     width: 100%;
-    max-width: 350px;        /* ideal for phone width */
+    min-width: 350px;        /* ideal for phone width */
     border: 1px solid #ccc;
     font-family: Arial, sans-serif;
     font-size: 14px;         /* comfortable default text size */
@@ -80,7 +80,7 @@
   }
 
   /* ===== Optimized for 350px screens ===== */
-  @media (max-width: 400px) {
+  @media (min-width: 400px) {
     .ovw-card {
       max-width: 100%;
       font-size: 13px;
@@ -112,7 +112,7 @@
   }
 
   /* ===== Extra compact mode for very narrow screens (320px) ===== */
-  @media (max-width: 330px) {
+  @media (min-width: 330px) {
     .ovw-row,
     .ovw-footer-row {
       padding: 4px 6px;
