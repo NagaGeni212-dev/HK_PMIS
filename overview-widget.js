@@ -12,7 +12,7 @@
     max-width: 320px;         /* but don’t get too wide on desktop */
     border: 1px solid #ccc;
     font-family: Arial, sans-serif;
-    font-size: 13px;
+    font-size: 16px;
     background: #ffffff;
     box-sizing: border-box;
     margin: 0 auto;           /* center card in its container */
