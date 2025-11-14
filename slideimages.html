@@ -54,17 +54,15 @@ function getOneDriveEmbedUrl(url) {
 }
 
 // -- GOOGLE DRIVE: List image files in folder (public 'anyone with link') --
-async function fetchGDriveImages(folderId) {
-  // NOTE: Needs only a free API key; for demo we use an "open" endpoint as workaround:
-  // We'll use the Drive "folder export" endpoint. No API key, but it's HTML, so we parse for image links.
-  const resp = await fetch(`https://drive.google.com/embeddedfolderview?id=${folderId}#list`);
-  const text = await resp.text();
-  // Parse out thumb URLs; crude but works for small demos
-  const imgMatches = [...text.matchAll(/data-thumb="([^"]+)"/g)];
-  const titleMatches = [...text.matchAll(/data-title="([^"]+)"/g)];
-  return imgMatches.map((m, idx) => ({
-    url: m[1],
-    filename: (titleMatches[idx] || [])[1] || "image"
+async function fetchGDriveImagesAPI(folderId, apiKey) {
+  const endpoint = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'image/'&key=${apiKey}&fields=files(id,name,mimeType,thumbnailLink,webContentLink)`;
+  const resp = await fetch(endpoint);
+  const data = await resp.json();
+
+  return (data.files || []).map(file => ({
+    url: file.webContentLink,     // direct download
+    thumb: file.thumbnailLink,
+    filename: file.name
   }));
 }
 
