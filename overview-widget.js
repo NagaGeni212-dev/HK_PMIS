@@ -70,7 +70,7 @@
       border-left: none;
       border-right: none;
       border-radius: 0;
-      font-size: 12px;        /* slightly smaller text */
+      font-size: 20px;        /* slightly smaller text */
     }
     .ovw-row,
     .ovw-footer-row {
