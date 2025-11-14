@@ -1,184 +1,411 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Public Cloud Folder Image Slideshow</title>
+  <meta charset="UTF-8" />
+  <title>Google Drive Albums</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: sans-serif; }
-    .albums { margin-bottom: 1em; }
-    .album-btn { margin: 0 4px; padding: 6px 12px; cursor: pointer; }
-    .active { background: #0078d4; color: #fff; }
-    .slideshow { display: flex; align-items: center; justify-content: center; min-height: 330px; }
-    .slide-img { max-width: 400px; max-height: 320px; border: 1px solid #ccc; border-radius: 4px; margin: 0 16px; }
-    .nav-btn { padding: 6px 14px; margin: 0 5px; font-size: 1.4em; cursor: pointer; }
-    .gallery-container { max-width: 480px; margin: 20px auto; border: 1px solid #ddd; border-radius: 8px; padding: 18px; }
-    .caption { text-align: center; margin-top: 10px; color: #555; }
-    .loading { color: #999; }
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      padding: 1rem 1.5rem;
+      background: #202124;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    #albums {
+      background: #fff;
+      border-radius: 12px;
+      padding: 0.75rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+    #albums h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .album-btn {
+      width: 100%;
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid #e0e0e0;
+      background: #fafafa;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+    }
+    .album-btn:hover {
+      background: #f0f0f0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      transform: translateY(-1px);
+    }
+    .album-btn.active {
+      background: #1a73e8;
+      color: #fff;
+      border-color: #1a73e8;
+    }
+
+    #viewer {
+      background: #000;
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #viewer img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    #viewer .nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: rgba(0,0,0,0.4);
+      color: #fff;
+      font-size: 1.5rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      cursor: pointer;
+      user-select: none;
+    }
+    #prevBtn { left: 12px; }
+    #nextBtn { right: 12px; }
+
+    #viewer .info {
+      position: absolute;
+      bottom: 8px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+      font-size: 0.85rem;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+    }
+    #viewer .info button {
+      border-radius: 999px;
+      border: none;
+      padding: 0.25rem 0.6rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    #status {
+      font-size: 0.85rem;
+      color: #888;
+      margin-left: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+      }
+      #viewer {
+        height: 60vh;
+      }
+    }
   </style>
 </head>
 <body>
-<div class="gallery-container">
-  <h2>Image Gallery</h2>
-  <div class="albums" id="albums"></div>
-  <div class="slideshow" id="slideshow"></div>
-  <div class="caption" id="caption"></div>
-</div>
-<script>
-// -- CONFIGURE YOUR FOLDERS HERE --
-const ALBUMS = [
-  {
-    name: "Sample Drive Album",
-    provider: "gdrive",
-    // Get this link by 'Share' in Drive, copy folder link (must be "anyone with link can view")
-    url: "https://drive.google.com/drive/folders/0B9fdbhyYNcZZVWFjS2p4ckFYR0k?resourcekey=0-DuTCCi1g3MZi-NA2XAGYRg", // <-- replace with actual folder ID
-  },
-  {
-    name: "Sample OneDrive Album",
-    provider: "onedrive",
-    // Get this link by sharing folder (View Anyone), copy public link
-    url: "https://hutamakaryapersero-my.sharepoint.com/:f:/g/personal/syayhuddin_sholeh_hutamakarya_com/EhIvr9n6SX9DqdlCTlA74lcBm1ZMd90rRE688GQg0eVJZQ?e=5uyoKr", // <-- replace with actual folder link
-  }
-];
+  <header>
+    <div>Drive Albums Slideshow</div>
+    <div>
+      <button id="signinBtn">Sign in</button>
+      <button id="signoutBtn" style="display:none;">Sign out</button>
+      <span id="status"></span>
+    </div>
+  </header>
 
-// -- GOOGLE DRIVE: Get folderId from URL --
-function extractGDriveFolderId(url) {
-  // works for most formats: .../folders/<id>
-  const m = url.match(/\/folders\/([a-zA-Z0-9_-]+)/);
-  return m ? m[1] : null;
-}
+  <main>
+    <section id="albums">
+      <h2>Albums</h2>
+      <div id="albumsList">Sign in to load folders…</div>
+    </section>
 
-// -- ONEDRIVE: Converts short link to embed url --
-function getOneDriveEmbedUrl(url) {
-  // Easiest: use "embed" viewer. Use original public url (OneDrive auto-handles security)
-  return "https://onedrive.live.com/embed?resurl=" + encodeURIComponent(url);
-}
+    <section id="viewer">
+      <span id="placeholder" style="color:#fff; opacity:0.7;">
+        Choose an album to start slideshow
+      </span>
+      <button class="nav" id="prevBtn" style="display:none;">‹</button>
+      <button class="nav" id="nextBtn" style="display:none;">›</button>
+      <div class="info" style="display:none;">
+        <span id="imageLabel"></span>
+        <button id="playPauseBtn">▶ Auto</button>
+      </div>
+    </section>
+  </main>
 
-// -- GOOGLE DRIVE: List image files in folder (public 'anyone with link') --
-async function fetchGDriveImagesAPI(folderId, apiKey) {
-  const endpoint = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'image/'&key=${apiKey}&fields=files(id,name,mimeType,thumbnailLink,webContentLink)`;
-  const resp = await fetch(endpoint);
-  const data = await resp.json();
+  <!-- Google API + Identity scripts -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js"></script>
 
-  return (data.files || []).map(file => ({
-    url: file.webContentLink,     // direct download
-    thumb: file.thumbnailLink,
-    filename: file.name
-  }));
-}
+  <script>
+    // ====== CONFIG ======
+    const CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID";
+    const API_KEY = ""; // optional if only using OAuth; can stay empty
+    const SCOPES = "https://www.googleapis.com/auth/drive.readonly";
 
-// -- ONEDRIVE: List image files (by scraping public folder) --
-async function fetchOneDriveImages(folderUrl) {
-  // OneDrive public folder: use oEmbed to get iframe source for gallery,
-  // There is no cleaner way without MS Graph API, but scraping works for public folders
-  // We'll fetch the HTML and scrape thumbnails
-  // WARNING: This may break if OneDrive changes their HTML!
+    let tokenClient;
+    let gapiInited = false;
+    let gisInited = false;
 
-  // Convert to expanded folder page (remove '?e=...' if present)
-  const pageUrl = folderUrl.replace(/\?e=[^&]+/, '');
-  const resp = await fetch(pageUrl);
-  const text = await resp.text();
-  // Look for: <img src="https://.../thumbnails/..." alt="...." ...>
-  const matches = [...text.matchAll(/<img[^>]+src="((?:https:)?\/\/(?:[\w.-]+\.)?onedrive\.live\.com\/[^"]+)"[^>]*alt="([^"]*)"/g)];
-  // Optionally filter to images only
-  const imgTypes = /\.(jpg|jpeg|png|gif|bmp|webp)$/i;
-  return matches
-    .filter(m => imgTypes.test(m[1]))
-    .map((m) => ({
-      url: m[1].startsWith('//') ? 'https:' + m[1] : m[1],
-      filename: m[2] || 'image'
-    }));
-}
+    let albums = [];      // {id, name}
+    let images = [];      // {id, name, thumbnailLink, webViewLink}
+    let currentIndex = 0;
+    let slideInterval = null;
 
-// -- Render UI --
-let state = { albumIdx: 0, slideIdx: 0, images: [], loading: false };
-const albumsDiv = document.getElementById('albums');
-const slideshowDiv = document.getElementById('slideshow');
-const captionDiv = document.getElementById('caption');
+    const signinBtn = document.getElementById("signinBtn");
+    const signoutBtn = document.getElementById("signoutBtn");
+    const statusEl = document.getElementById("status");
+    const albumsListEl = document.getElementById("albumsList");
+    const viewer = document.getElementById("viewer");
+    const placeholder = document.getElementById("placeholder");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const infoBar = viewer.querySelector(".info");
+    const imageLabel = document.getElementById("imageLabel");
+    const playPauseBtn = document.getElementById("playPauseBtn");
 
-function renderAlbums() {
-  albumsDiv.innerHTML = '';
-  ALBUMS.forEach((album, idx) => {
-    const btn = document.createElement('button');
-    btn.textContent = album.name;
-    btn.className = 'album-btn' + (idx === state.albumIdx ? ' active' : '');
-    btn.onclick = () => selectAlbum(idx);
-    albumsDiv.appendChild(btn);
-  });
-}
+    // ====== INIT GOOGLE API ======
+    window.onload = () => {
+      gapi.load("client", initGapiClient);
 
-function renderSlideshow() {
-  slideshowDiv.innerHTML = '';
-  captionDiv.textContent = '';
-  if (state.loading) {
-    slideshowDiv.innerHTML = '<span class="loading">Loading images…</span>';
-    return;
-  }
-  if (!state.images.length) {
-    slideshowDiv.innerHTML = '<span class="loading">No images found.</span>';
-    return;
-  }
-  const imgObj = state.images[state.slideIdx];
-  const prev = document.createElement('button');
-  prev.textContent = '<';
-  prev.className = 'nav-btn';
-  prev.onclick = () => showSlide(state.slideIdx - 1);
-  // disable if first
-  prev.disabled = state.slideIdx === 0;
-  const next = document.createElement('button');
-  next.textContent = '>';
-  next.className = 'nav-btn';
-  next.onclick = () => showSlide(state.slideIdx + 1);
-  next.disabled = state.slideIdx === state.images.length - 1;
-  const img = document.createElement('img');
-  img.src = imgObj.url;
-  img.alt = imgObj.filename || "image";
-  img.className = 'slide-img';
-  slideshowDiv.appendChild(prev);
-  slideshowDiv.appendChild(img);
-  slideshowDiv.appendChild(next);
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: "", // defined later
+      });
+    };
 
-  captionDiv.textContent = (imgObj.filename || '') + ` (${state.slideIdx + 1} of ${state.images.length})`;
-}
-
-// -- Album Selection --
-async function selectAlbum(idx) {
-  state.albumIdx = idx;
-  state.slideIdx = 0;
-  state.images = [];
-  state.loading = true;
-  renderAlbums();
-  renderSlideshow();
-  // Load images:
-  const album = ALBUMS[idx];
-  let imgs = [];
-  try {
-    if (album.provider === 'gdrive') {
-      const folderId = extractGDriveFolderId(album.url);
-      imgs = await fetchGDriveImages(folderId);
-    } else if (album.provider === 'onedrive') {
-      imgs = await fetchOneDriveImages(album.url);
+    async function initGapiClient() {
+      try {
+        await gapi.client.init({
+          apiKey: API_KEY,
+          discoveryDocs: [
+            "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"
+          ],
+        });
+        gapiInited = true;
+        maybeEnableButtons();
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "Error initializing Google API";
+      }
     }
-  } catch (e) {
-    imgs = [];
-    console.error("Failed to load images", e);
-  }
-  state.images = imgs;
-  state.loading = false;
-  renderAlbums();
-  renderSlideshow();
-}
 
-function showSlide(idx) {
-  if (idx >= 0 && idx < state.images.length) {
-    state.slideIdx = idx;
-    renderSlideshow();
-  }
-}
+    function maybeEnableButtons() {
+      if (gapiInited) {
+        signinBtn.disabled = false;
+      }
+    }
 
-// -- Init --
-renderAlbums();
-selectAlbum(0);
+    // ====== AUTH ======
+    signinBtn.onclick = () => {
+      tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+          console.error(resp);
+          return;
+        }
+        signinBtn.style.display = "none";
+        signoutBtn.style.display = "inline-block";
+        statusEl.textContent = "Signed in";
+        await listAlbums();
+      };
 
-</script>
+      if (gapi.client.getToken() === null) {
+        tokenClient.requestAccessToken({prompt: "consent"});
+      } else {
+        tokenClient.requestAccessToken({prompt: ""});
+      }
+    };
+
+    signoutBtn.onclick = () => {
+      const token = gapi.client.getToken();
+      if (token !== null) {
+        google.accounts.oauth2.revoke(token.access_token);
+        gapi.client.setToken("");
+        albums = [];
+        images = [];
+        albumsListEl.innerHTML = "Signed out.";
+        resetViewer();
+        signinBtn.style.display = "inline-block";
+        signoutBtn.style.display = "none";
+        statusEl.textContent = "Signed out";
+      }
+    };
+
+    // ====== DRIVE API HELPERS ======
+
+    // List "album" folders – you can customize the query to target a specific parent folder
+    async function listAlbums() {
+      statusEl.textContent = "Loading folders…";
+      albumsListEl.textContent = "Loading…";
+
+      try {
+        const res = await gapi.client.drive.files.list({
+          q: "mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+          fields: "files(id, name)",
+          pageSize: 100,
+        });
+
+        albums = res.result.files || [];
+        if (!albums.length) {
+          albumsListEl.textContent = "No folders found in Drive.";
+          statusEl.textContent = "";
+          return;
+        }
+
+        renderAlbums();
+        statusEl.textContent = "";
+      } catch (err) {
+        console.error(err);
+        albumsListEl.textContent = "Failed to load folders.";
+        statusEl.textContent = "Error loading folders";
+      }
+    }
+
+    function renderAlbums() {
+      albumsListEl.innerHTML = "";
+      albums.forEach((folder, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "album-btn";
+        btn.textContent = folder.name;
+        btn.onclick = () => {
+          document
+            .querySelectorAll(".album-btn")
+            .forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          loadImagesFromAlbum(folder.id, folder.name);
+        };
+        if (idx === 0) {
+          // optional: auto-select first album
+          btn.classList.add("active");
+        }
+        albumsListEl.appendChild(btn);
+      });
+    }
+
+    async function loadImagesFromAlbum(folderId, folderName) {
+      statusEl.textContent = `Loading images from "${folderName}"…`;
+      resetViewer();
+      try {
+        const res = await gapi.client.drive.files.list({
+          q: `'${folderId}' in parents and mimeType contains 'image/' and trashed = false`,
+          fields: "files(id, name, thumbnailLink, webViewLink)",
+          pageSize: 1000,
+        });
+
+        images = res.result.files || [];
+        if (!images.length) {
+          placeholder.textContent = `No images found in "${folderName}".`;
+          statusEl.textContent = "";
+          return;
+        }
+        currentIndex = 0;
+        showImage();
+        statusEl.textContent = "";
+      } catch (err) {
+        console.error(err);
+        placeholder.textContent = "Failed to load images.";
+        statusEl.textContent = "Error loading images";
+      }
+    }
+
+    // ====== SLIDESHOW LOGIC ======
+    function resetViewer() {
+      stopAuto();
+      // remove existing image
+      const existingImg = viewer.querySelector("img");
+      if (existingImg) existingImg.remove();
+
+      placeholder.style.display = "block";
+      prevBtn.style.display = "none";
+      nextBtn.style.display = "none";
+      infoBar.style.display = "none";
+    }
+
+    function showImage() {
+      if (!images.length) return;
+
+      let img = viewer.querySelector("img");
+      if (!img) {
+        img = document.createElement("img");
+        viewer.appendChild(img);
+      }
+
+      const file = images[currentIndex];
+      img.src = file.thumbnailLink || file.webViewLink;
+      img.alt = file.name;
+      placeholder.style.display = "none";
+      prevBtn.style.display = "inline-block";
+      nextBtn.style.display = "inline-block";
+      infoBar.style.display = "flex";
+      imageLabel.textContent =
+        `${file.name} (${currentIndex + 1} / ${images.length})`;
+    }
+
+    prevBtn.onclick = () => {
+      if (!images.length) return;
+      currentIndex = (currentIndex - 1 + images.length) % images.length;
+      showImage();
+    };
+
+    nextBtn.onclick = () => {
+      if (!images.length) return;
+      currentIndex = (currentIndex + 1) % images.length;
+      showImage();
+    };
+
+    function startAuto() {
+      if (slideInterval) return;
+      slideInterval = setInterval(() => {
+        nextBtn.click();
+      }, 3000); // change slide every 3s
+      playPauseBtn.textContent = "⏸ Auto";
+    }
+
+    function stopAuto() {
+      if (!slideInterval) return;
+      clearInterval(slideInterval);
+      slideInterval = null;
+      playPauseBtn.textContent = "▶ Auto";
+    }
+
+    playPauseBtn.onclick = () => {
+      if (slideInterval) stopAuto();
+      else startAuto();
+    };
+  </script>
 </body>
 </html>
