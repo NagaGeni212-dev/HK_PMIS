@@ -126,6 +126,13 @@
     .ovw-title {
       font-size: 14px;
     }
+
+    .ovw-unit {
+      color: #888;
+      margin-left: 3px;
+      font-size: 11px;
+    }
+    
   }
 `;
     document.head.appendChild(style);
@@ -150,14 +157,11 @@
       // Clean raw values
       const value = valueRaw ? valueRaw.trim().replace(/^"(.*)"$/, '$1') : '';
       const unit  = unitRaw ? unitRaw.trim().replace(/^"(.*)"$/, '$1') : '';
-
-      // Format number only (ignore unit)
-      const formattedValue = formatNumberIfNeeded(value);
-
-      // Combine value + unit
-      const combined = unit ? `${formattedValue} ${unit}` : formattedValue;
-
-      map[key] = combined;
+      // Store both formatted value and unit separately
+      map[key] = {
+        formattedValue: formatNumberIfNeeded(value),
+        unit: unit
+      };
     }
   });
 
@@ -228,15 +232,27 @@
   }
 
   function fillMetrics(container, metricMap) {
-    container.querySelectorAll('[data-metric]').forEach(el => {
-      const key = el.getAttribute('data-metric');
-      if (metricMap[key] != null) {
-  el.textContent = formatNumberIfNeeded(metricMap[key]);
-} else {
-  el.textContent = '-';
+  container.querySelectorAll('[data-metric]').forEach(el => {
+    const key = el.getAttribute('data-metric');
+    const entry = metricMap[key];
+
+    if (entry && entry.formattedValue != null) {
+      // Clear existing content
+      el.textContent = '';
+      // Add value
+      el.append(document.createTextNode(entry.formattedValue));
+      // Add unit (if present)
+      if (entry.unit) {
+        const unitEl = document.createElement('span');
+        unitEl.className = 'ovw-unit';
+        unitEl.textContent = ` ${entry.unit}`;
+        el.appendChild(unitEl);
+      }
+    } else {
+      el.textContent = '-';
+    }
+  });
 }
-    });
-  }
 
   async function initWidget(container) {
     const csvUrl = container.dataset.sheetCsv;
