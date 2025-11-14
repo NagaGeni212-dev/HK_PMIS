@@ -142,13 +142,25 @@
   function csvToMetricMap(text) {
   const rows = parseCSV(text);
   const map = {};
+
   rows.forEach(row => {
-    const [key, valueRaw] = row;
+    const [key, valueRaw, unitRaw] = row;
+
     if (key) {
-      const cleaned = (valueRaw || '').trim().replace(/^"(.*)"$/, '$1');
-      map[key] = cleaned;
+      // Clean raw values
+      const value = valueRaw ? valueRaw.trim().replace(/^"(.*)"$/, '$1') : '';
+      const unit  = unitRaw ? unitRaw.trim().replace(/^"(.*)"$/, '$1') : '';
+
+      // Format number only (ignore unit)
+      const formattedValue = formatNumberIfNeeded(value);
+
+      // Combine value + unit
+      const combined = unit ? `${formattedValue} ${unit}` : formattedValue;
+
+      map[key] = combined;
     }
   });
+
   return map;
 }
 
