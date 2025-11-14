@@ -8,73 +8,123 @@
     style.id = STYLE_ID;
     style.textContent = `
   .ovw-card {
-    width: 100%;              /* fill the container */
-    max-width: 320px;         /* but don’t get too wide on desktop */
+    width: 100%;
+    max-width: 350px;        /* ideal for phone width */
     border: 1px solid #ccc;
     font-family: Arial, sans-serif;
-    font-size: 20px;
+    font-size: 14px;         /* comfortable default text size */
     background: #ffffff;
     box-sizing: border-box;
-    margin: 0 auto;           /* center card in its container */
+    margin: 0 auto;
+    border-radius: 8px;
   }
+
   .ovw-title {
     background: #4b0007;
     color: #fff;
     text-align: center;
-    padding: 8px 4px;
+    padding: 10px 6px;
     font-weight: bold;
+    font-size: 16px;
   }
+
   .ovw-section {
     border-top: 1px solid #ddd;
-    padding: 8px 4px;
+    padding: 10px 6px;
   }
+
   .ovw-section-header {
     background: #e5e5e5;
     text-align: center;
-    padding: 4px 2px;
+    padding: 6px 4px;
     font-weight: bold;
+    font-size: 14px;
   }
+
   .ovw-row {
     display: flex;
     justify-content: space-between;
-    padding: 4px 8px;
+    padding: 6px 10px;
   }
+
   .ovw-label {
     font-weight: bold;
+    font-size: 13px;
   }
+
   .ovw-value {
     color: #c00000;
     font-weight: bold;
+    font-size: 14px;
     text-align: right;
   }
+
   .ovw-row.center {
     justify-content: center;
   }
+
   .ovw-row.center .ovw-value {
     text-align: center;
     width: 100%;
   }
+
   .ovw-footer-row {
     display: flex;
     justify-content: space-around;
-    padding: 4px 8px;
-  }
-  .ovw-footer-row .ovw-label {
-    font-weight: bold;
+    padding: 6px 10px;
   }
 
-  /* ===== Responsive tweaks ===== */
-  @media (max-width: 480px) {
+  .ovw-footer-row .ovw-label {
+    font-weight: bold;
+    font-size: 13px;
+  }
+
+  /* ===== Optimized for 350px screens ===== */
+  @media (max-width: 400px) {
     .ovw-card {
-      max-width: 100%;        /* use full width on small screens */
-      border-left: none;
-      border-right: none;
+      max-width: 100%;
+      font-size: 13px;
       border-radius: 0;
-      font-size: 20px;        /* slightly smaller text */
     }
+
+    .ovw-row,
+    .ovw-footer-row {
+      padding: 6px 8px;
+    }
+
+    .ovw-label {
+      font-size: 12px;
+    }
+
+    .ovw-value {
+      font-size: 13px;
+    }
+
+    .ovw-title {
+      font-size: 15px;
+      padding: 8px 5px;
+    }
+
+    .ovw-section-header {
+      font-size: 13px;
+      padding: 5px 3px;
+    }
+  }
+
+  /* ===== Extra compact mode for very narrow screens (320px) ===== */
+  @media (max-width: 330px) {
     .ovw-row,
     .ovw-footer-row {
       padding: 4px 6px;
+    }
+
+    .ovw-label,
+    .ovw-value {
+      font-size: 12px;
+    }
+
+    .ovw-title {
+      font-size: 14px;
     }
   }
 `;
