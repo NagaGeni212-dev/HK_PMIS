@@ -7,59 +7,77 @@
     const style = document.createElement('style');
     style.id = STYLE_ID;
     style.textContent = `
-      .ovw-card {
-        width: 260px;
-        border: 1px solid #ccc;
-        font-family: Arial, sans-serif;
-        font-size: 13px;
-        background: #ffffff;
-      }
-      .ovw-title {
-        background: #4b0007;
-        color: #fff;
-        text-align: center;
-        padding: 8px 4px;
-        font-weight: bold;
-      }
-      .ovw-section {
-        border-top: 1px solid #ddd;
-        padding: 8px 4px;
-      }
-      .ovw-section-header {
-        background: #e5e5e5;
-        text-align: center;
-        padding: 4px 2px;
-        font-weight: bold;
-      }
-      .ovw-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 4px 8px;
-      }
-      .ovw-label {
-        font-weight: bold;
-      }
-      .ovw-value {
-        color: #c00000;
-        font-weight: bold;
-        text-align: right;
-      }
-      .ovw-row.center {
-        justify-content: center;
-      }
-      .ovw-row.center .ovw-value {
-        text-align: center;
-        width: 100%;
-      }
-      .ovw-footer-row {
-        display: flex;
-        justify-content: space-around;
-        padding: 4px 8px;
-      }
-      .ovw-footer-row .ovw-label {
-        font-weight: bold;
-      }
-    `;
+  .ovw-card {
+    width: 100%;              /* fill the container */
+    max-width: 320px;         /* but don’t get too wide on desktop */
+    border: 1px solid #ccc;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    background: #ffffff;
+    box-sizing: border-box;
+    margin: 0 auto;           /* center card in its container */
+  }
+  .ovw-title {
+    background: #4b0007;
+    color: #fff;
+    text-align: center;
+    padding: 8px 4px;
+    font-weight: bold;
+  }
+  .ovw-section {
+    border-top: 1px solid #ddd;
+    padding: 8px 4px;
+  }
+  .ovw-section-header {
+    background: #e5e5e5;
+    text-align: center;
+    padding: 4px 2px;
+    font-weight: bold;
+  }
+  .ovw-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 8px;
+  }
+  .ovw-label {
+    font-weight: bold;
+  }
+  .ovw-value {
+    color: #c00000;
+    font-weight: bold;
+    text-align: right;
+  }
+  .ovw-row.center {
+    justify-content: center;
+  }
+  .ovw-row.center .ovw-value {
+    text-align: center;
+    width: 100%;
+  }
+  .ovw-footer-row {
+    display: flex;
+    justify-content: space-around;
+    padding: 4px 8px;
+  }
+  .ovw-footer-row .ovw-label {
+    font-weight: bold;
+  }
+
+  /* ===== Responsive tweaks ===== */
+  @media (max-width: 480px) {
+    .ovw-card {
+      max-width: 100%;        /* use full width on small screens */
+      border-left: none;
+      border-right: none;
+      border-radius: 0;
+      font-size: 12px;        /* slightly smaller text */
+    }
+    .ovw-row,
+    .ovw-footer-row {
+      padding: 4px 6px;
+    }
+  }
+`;
     document.head.appendChild(style);
   }
 
