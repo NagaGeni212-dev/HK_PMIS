@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Public Cloud Folder Image Slideshow</title>
+  <style>
+    body { font-family: sans-serif; }
+    .albums { margin-bottom: 1em; }
+    .album-btn { margin: 0 4px; padding: 6px 12px; cursor: pointer; }
+    .active { background: #0078d4; color: #fff; }
+    .slideshow { display: flex; align-items: center; justify-content: center; min-height: 330px; }
+    .slide-img { max-width: 400px; max-height: 320px; border: 1px solid #ccc; border-radius: 4px; margin: 0 16px; }
+    .nav-btn { padding: 6px 14px; margin: 0 5px; font-size: 1.4em; cursor: pointer; }
+    .gallery-container { max-width: 480px; margin: 20px auto; border: 1px solid #ddd; border-radius: 8px; padding: 18px; }
+    .caption { text-align: center; margin-top: 10px; color: #555; }
+    .loading { color: #999; }
+  </style>
+</head>
+<body>
+<div class="gallery-container">
+  <h2>Image Gallery</h2>
+  <div class="albums" id="albums"></div>
+  <div class="slideshow" id="slideshow"></div>
+  <div class="caption" id="caption"></div>
+</div>
+<script>
+// -- CONFIGURE YOUR FOLDERS HERE --
+const ALBUMS = [
+  {
+    name: "Sample Drive Album",
+    provider: "gdrive",
+    // Get this link by 'Share' in Drive, copy folder link (must be "anyone with link can view")
+    url: "https://drive.google.com/drive/folders/1g9-8KLXXXYYYZZZ", // <-- replace with actual folder ID
+  },
+  {
+    name: "Sample OneDrive Album",
+    provider: "onedrive",
+    // Get this link by sharing folder (View Anyone), copy public link
+    url: "https://1drv.ms/f/s!Aj6xXtXXXYYYZZZ?e=abcd", // <-- replace with actual folder link
+  }
+];
+
+// -- GOOGLE DRIVE: Get folderId from URL --
+function extractGDriveFolderId(url) {
+  // works for most formats: .../folders/<id>
+  const m = url.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
+// -- ONEDRIVE: Converts short link to embed url --
+function getOneDriveEmbedUrl(url) {
+  // Easiest: use "embed" viewer. Use original public url (OneDrive auto-handles security)
+  return "https://onedrive.live.com/embed?resurl=" + encodeURIComponent(url);
+}
+
+// -- GOOGLE DRIVE: List image files in folder (public 'anyone with link') --
+async function fetchGDriveImages(folderId) {
+  // NOTE: Needs only a free API key; for demo we use an "open" endpoint as workaround:
+  // We'll use the Drive "folder export" endpoint. No API key, but it's HTML, so we parse for image links.
+  const resp = await fetch(`https://drive.google.com/embeddedfolderview?id=${folderId}#list`);
+  const text = await resp.text();
+  // Parse out thumb URLs; crude but works for small demos
+  const imgMatches = [...text.matchAll(/data-thumb="([^"]+)"/g)];
+  const titleMatches = [...text.matchAll(/data-title="([^"]+)"/g)];
+  return imgMatches.map((m, idx) => ({
+    url: m[1],
+    filename: (titleMatches[idx] || [])[1] || "image"
+  }));
+}
+
+// -- ONEDRIVE: List image files (by scraping public folder) --
+async function fetchOneDriveImages(folderUrl) {
+  // OneDrive public folder: use oEmbed to get iframe source for gallery,
+  // There is no cleaner way without MS Graph API, but scraping works for public folders
+  // We'll fetch the HTML and scrape thumbnails
+  // WARNING: This may break if OneDrive changes their HTML!
+
+  // Convert to expanded folder page (remove '?e=...' if present)
+  const pageUrl = folderUrl.replace(/\?e=[^&]+/, '');
+  const resp = await fetch(pageUrl);
+  const text = await resp.text();
+  // Look for: <img src="https://.../thumbnails/..." alt="...." ...>
+  const matches = [...text.matchAll(/<img[^>]+src="((?:https:)?\/\/(?:[\w.-]+\.)?onedrive\.live\.com\/[^"]+)"[^>]*alt="([^"]*)"/g)];
+  // Optionally filter to images only
+  const imgTypes = /\.(jpg|jpeg|png|gif|bmp|webp)$/i;
+  return matches
+    .filter(m => imgTypes.test(m[1]))
+    .map((m) => ({
+      url: m[1].startsWith('//') ? 'https:' + m[1] : m[1],
+      filename: m[2] || 'image'
+    }));
+}
+
+// -- Render UI --
+let state = { albumIdx: 0, slideIdx: 0, images: [], loading: false };
+const albumsDiv = document.getElementById('albums');
+const slideshowDiv = document.getElementById('slideshow');
+const captionDiv = document.getElementById('caption');
+
+function renderAlbums() {
+  albumsDiv.innerHTML = '';
+  ALBUMS.forEach((album, idx) => {
+    const btn = document.createElement('button');
+    btn.textContent = album.name;
+    btn.className = 'album-btn' + (idx === state.albumIdx ? ' active' : '');
+    btn.onclick = () => selectAlbum(idx);
+    albumsDiv.appendChild(btn);
+  });
+}
+
+function renderSlideshow() {
+  slideshowDiv.innerHTML = '';
+  captionDiv.textContent = '';
+  if (state.loading) {
+    slideshowDiv.innerHTML = '<span class="loading">Loading images…</span>';
+    return;
+  }
+  if (!state.images.length) {
+    slideshowDiv.innerHTML = '<span class="loading">No images found.</span>';
+    return;
+  }
+  const imgObj = state.images[state.slideIdx];
+  const prev = document.createElement('button');
+  prev.textContent = '<';
+  prev.className = 'nav-btn';
+  prev.onclick = () => showSlide(state.slideIdx - 1);
+  // disable if first
+  prev.disabled = state.slideIdx === 0;
+  const next = document.createElement('button');
+  next.textContent = '>';
+  next.className = 'nav-btn';
+  next.onclick = () => showSlide(state.slideIdx + 1);
+  next.disabled = state.slideIdx === state.images.length - 1;
+  const img = document.createElement('img');
+  img.src = imgObj.url;
+  img.alt = imgObj.filename || "image";
+  img.className = 'slide-img';
+  slideshowDiv.appendChild(prev);
+  slideshowDiv.appendChild(img);
+  slideshowDiv.appendChild(next);
+
+  captionDiv.textContent = (imgObj.filename || '') + ` (${state.slideIdx + 1} of ${state.images.length})`;
+}
+
+// -- Album Selection --
+async function selectAlbum(idx) {
+  state.albumIdx = idx;
+  state.slideIdx = 0;
+  state.images = [];
+  state.loading = true;
+  renderAlbums();
+  renderSlideshow();
+  // Load images:
+  const album = ALBUMS[idx];
+  let imgs = [];
+  try {
+    if (album.provider === 'gdrive') {
+      const folderId = extractGDriveFolderId(album.url);
+      imgs = await fetchGDriveImages(folderId);
+    } else if (album.provider === 'onedrive') {
+      imgs = await fetchOneDriveImages(album.url);
+    }
+  } catch (e) {
+    imgs = [];
+    console.error("Failed to load images", e);
+  }
+  state.images = imgs;
+  state.loading = false;
+  renderAlbums();
+  renderSlideshow();
+}
+
+function showSlide(idx) {
+  if (idx >= 0 && idx < state.images.length) {
+    state.slideIdx = idx;
+    renderSlideshow();
+  }
+}
+
+// -- Init --
+renderAlbums();
+selectAlbum(0);
+
+</script>
+</body>
+</html>
