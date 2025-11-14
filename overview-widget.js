@@ -168,7 +168,11 @@
   function fillMetrics(container, metricMap) {
     container.querySelectorAll('[data-metric]').forEach(el => {
       const key = el.getAttribute('data-metric');
-      el.textContent = metricMap[key] != null ? metricMap[key] : '-';
+      if (metricMap[key] != null) {
+  el.textContent = formatNumberIfNeeded(metricMap[key]);
+} else {
+  el.textContent = '-';
+}
     });
   }
 
@@ -201,6 +205,42 @@
       .querySelectorAll('[data-overview-widget]')
       .forEach(initWidget);
   }
+
+  function formatNumberIfNeeded(value) {
+  // Trim spaces
+  value = value.trim();
+
+  // If value has % at end → handle separately
+  const isPercent = value.endsWith('%');
+  if (isPercent) {
+    const num = parseFloat(value.replace('%', ''));
+    if (!isNaN(num)) {
+      return num % 1 === 0 ? `${num}%` : `${num.toFixed(2)}%`;
+    }
+    return value; // fallback
+  }
+
+  // If value contains "M" (millions), format number part
+  const isMillion = value.endsWith('M') || value.endsWith('m');
+  if (isMillion) {
+    const num = parseFloat(value.replace(/[Mm]/, ''));
+    if (!isNaN(num)) {
+      const formatted =
+        num % 1 === 0 ? `${num} M` : `${num.toFixed(2)} M`;
+      return formatted;
+    }
+    return value;
+  }
+
+  // Normal number (no % or M)
+  const normalNum = parseFloat(value);
+  if (!isNaN(normalNum)) {
+    return normalNum % 1 === 0 ? `${normalNum}` : `${normalNum.toFixed(2)}`;
+  }
+
+  // Non-numeric → return unchanged
+  return value;
+}
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initAllWidgets);
