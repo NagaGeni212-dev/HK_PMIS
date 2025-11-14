@@ -94,8 +94,8 @@
             <div class="ovw-label">HPP ARP</div>
           </div>
           <div class="ovw-row">
-            <div class="ovw-value" data-metric="HB"></div>
-            <div class="ovw-value" data-metric="HPP_ARP"></div>
+            <div class="ovw-value" data-metric=HB></div>
+            <div class="ovw-value" data-metric=HPP_ARP></div>
           </div>
         </div>
 
@@ -105,15 +105,15 @@
             <div class="ovw-label">HPP Real</div>
           </div>
           <div class="ovw-row">
-            <div class="ovw-value" data-metric="Real_Progress"></div>
-            <div class="ovw-value" data-metric="HPP_Real"></div>
+            <div class="ovw-value" data-metric=Real_Progress></div>
+            <div class="ovw-value" data-metric=HPP_Real></div>
           </div>
         </div>
 
         <div class="ovw-section">
           <div class="ovw-section-header">EAC %</div>
           <div class="ovw-row center">
-            <div class="ovw-value" data-metric="EAC"></div>
+            <div class="ovw-value" data-metric=EAC></div>
           </div>
         </div>
 
@@ -124,8 +124,8 @@
             <div class="ovw-label">Defisit / Surplus</div>
           </div>
           <div class="ovw-row">
-            <div class="ovw-value" data-metric="Cash_in"></div>
-            <div class="ovw-value" data-metric="Defisit_Surplus"></div>
+            <div class="ovw-value" data-metric=Cash_in></div>
+            <div class="ovw-value" data-metric=Defisit_Surplus></div>
           </div>
         </div>
 
@@ -137,9 +137,9 @@
             <div class="ovw-label">Fatality</div>
           </div>
           <div class="ovw-footer-row">
-            <div class="ovw-value" data-metric="NC"></div>
-            <div class="ovw-value" data-metric="Nearmiss"></div>
-            <div class="ovw-value" data-metric="Fatality"></div>
+            <div class="ovw-value" data-metric=NC></div>
+            <div class="ovw-value" data-metric=Nearmiss></div>
+            <div class="ovw-value" data-metric=Fatality></div>
           </div>
         </div>
       </div>
